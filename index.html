@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hip Color Palettes App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+    .palette {
+      margin-bottom: 30px;
+    }
+    .palette-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .swatches {
+      display: flex;
+    }
+    .swatch {
+      width: 60px;
+      height: 60px;
+      margin-right: 4px;
+      position: relative;
+      border: 1px solid #ccc;
+    }
+    .swatch span {
+      position: absolute;
+      bottom: 2px;
+      left: 2px;
+      font-size: 10px;
+      color: #000;
+      background: rgba(255,255,255,0.7);
+      padding: 1px 2px;
+      border-radius: 2px;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+    }
+    button {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hip Color Palettes</h1>
+  <p>This page loads 50 hip color palettes. You can edit the JSON below to modify palettes; click Update to refresh the display.</p>
+  <textarea id="jsonInput"></textarea>
+  <br>
+  <button onclick="updatePalettes()">Update palettes</button>
+  <div id="palettesContainer"></div>
+
+  <script>
+    async function loadPalettes() {
+      try {
+        const response = await fetch('palettes.json');
+        const data = await response.json();
+        palettes = data;
+        document.getElementById('jsonInput').value = JSON.stringify(palettes, null, 2);
+        renderPalettes(palettes);
+      } catch (err) {
+        console.error('Error loading palettes:', err);
+      }
+    }
+
+    let palettes = {};
+
+    function renderPalettes(pal) {
+      const container = document.getElementById('palettesContainer');
+      container.innerHTML = '';
+      for (const name in pal) {
+        const colors = pal[name];
+        const paletteDiv = document.createElement('div');
+        paletteDiv.className = 'palette';
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'palette-name';
+        nameDiv.textContent = name;
+        paletteDiv.appendChild(nameDiv);
+        const swatchesDiv = document.createElement('div');
+        swatchesDiv.className = 'swatches';
+        for (const token in colors) {
+          const swatchDiv = document.createElement('div');
+          swatchDiv.className = 'swatch';
+          swatchDiv.style.backgroundColor = colors[token];
+          const span = document.createElement('span');
+          span.textContent = token;
+          swatchDiv.appendChild(span);
+          swatchesDiv.appendChild(swatchDiv);
+        }
+        paletteDiv.appendChild(swatchesDiv);
+        container.appendChild(paletteDiv);
+      }
+    }
+
+    function updatePalettes() {
+      try {
+        palettes = JSON.parse(document.getElementById('jsonInput').value);
+        renderPalettes(palettes);
+      } catch (e) {
+        alert('Invalid JSON');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPalettes);
+  </script>
+</body>
+</html>
